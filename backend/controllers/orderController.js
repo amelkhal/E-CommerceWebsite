@@ -1,8 +1,8 @@
-const Order = require('../models/Order');
-const Book = require('../models/Book');
+import Order from '../models/Order.js';
+import Book from '../models/Book.js';
 
 // Create an order
-exports.createOrder = async (req, res) => {
+export const createOrder = async (req, res) => {
   const { items, shippingAddress, paymentMethod } = req.body;
 
   // Basic validation
@@ -44,7 +44,7 @@ exports.createOrder = async (req, res) => {
 };
 
 // Get all orders for a user
-exports.getOrders = async (req, res) => {
+export const getOrders = async (req, res) => {
   try {
     const orders = await Order.find({ user: req.user.id }).sort({ date: -1 });
     res.json(orders);
@@ -55,7 +55,7 @@ exports.getOrders = async (req, res) => {
 };
 
 // Get a specific order by ID
-exports.getOrderById = async (req, res) => {
+export const getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -75,7 +75,7 @@ exports.getOrderById = async (req, res) => {
 };
 
 // Update the status of an order
-exports.updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res) => {
   const { status } = req.body;
 
   // Basic validation
@@ -99,6 +99,17 @@ exports.updateOrderStatus = async (req, res) => {
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ message: 'Order not found' });
     }
+    res.status(500).send('Server Error');
+  }
+};
+
+// Get all orders for a user (if not included in `getOrders`)
+export const getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user.id }).sort({ date: -1 });
+    res.json(orders);
+  } catch (err) {
+    console.error(err.message);
     res.status(500).send('Server Error');
   }
 };

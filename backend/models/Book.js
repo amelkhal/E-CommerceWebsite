@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 // Schema for individual reviews
 const reviewSchema = new mongoose.Schema({
@@ -86,4 +86,4 @@ const bookSchema = new mongoose.Schema({
 
 const Book = mongoose.model('Book', bookSchema);
 
-module.exports = Book;
+export default Book;

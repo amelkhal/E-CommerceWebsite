@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "ajv": "^6.12.6",
     "react-bootstrap": "^2.10.4"
   }
 }

@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import { createOrder, getOrders, getOrderById, updateOrderStatus } from '../controllers/orderController.js';
+import authMiddleware from '../middlewares/authMiddleware.js';
+
 const router = express.Router();
-const { createOrder, getOrders, getOrderById, updateOrderStatus } = require('../controllers/orderController');
-const authMiddleware = require('../middlewares/authMiddleware');
 
 // Route to create a new order (requires authentication)
 router.post('/', authMiddleware, createOrder);
@@ -15,4 +16,4 @@ router.get('/:id', authMiddleware, getOrderById);
 // Route to update the status of an order by ID (requires authentication)
 router.put('/:id/status', authMiddleware, updateOrderStatus);
 
-module.exports = router;
+export default router;

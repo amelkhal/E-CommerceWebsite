@@ -1,6 +1,6 @@
-const Book = require('../models/Book');
+import Book from '../models/Book.js';
 
-exports.getBooks = async (req, res) => {
+export const getBooks = async (req, res) => {
   try {
     const books = await Book.find();
     res.json(books);
@@ -10,7 +10,7 @@ exports.getBooks = async (req, res) => {
   }
 };
 
-exports.getBookById = async (req, res) => {
+export const getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
@@ -26,7 +26,7 @@ exports.getBookById = async (req, res) => {
   }
 };
 
-exports.createBook = async (req, res) => {
+export const createBook = async (req, res) => {
   const { title, author, description, price, countInStock } = req.body;
 
   // Basic validation
@@ -50,7 +50,7 @@ exports.createBook = async (req, res) => {
   }
 };
 
-exports.updateBook = async (req, res) => {
+export const updateBook = async (req, res) => {
   const { title, author, description, price, countInStock } = req.body;
 
   // Basic validation
@@ -81,7 +81,7 @@ exports.updateBook = async (req, res) => {
   }
 };
 
-exports.deleteBook = async (req, res) => {
+export const deleteBook = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {

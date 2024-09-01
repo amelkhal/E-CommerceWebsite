@@ -1,8 +1,10 @@
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const { errorHandler } = require('./middlewares/errorMiddleware');
-require('dotenv').config();
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db.js';
+import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 
@@ -14,11 +16,18 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/books', require('./routes/bookRoutes'));
-app.use('/api/orders', require('./routes/orderRoutes'));
+import authRoutes from './routes/authRoutes.js';
+import bookRoutes from './routes/bookRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+
+app.use('/api/auth', authRoutes);
+app.use('/api/books', bookRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handling middleware
+app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;

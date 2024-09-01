@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs'); // Import bcrypt for password hashing
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -19,6 +19,21 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  fullName: {
+    type: String,
+    trim: true,
+  },
+  shippingAddress: {
+    address: String,
+    city: String,
+    postalCode: String,
+    country: String,
+  },
+  paymentInfo: {
+    cardNumber: String,
+    expirationDate: String,
+    cvv: String,
+  },
   isAdmin: {
     type: Boolean,
     default: false,
@@ -30,7 +45,7 @@ const UserSchema = new mongoose.Schema({
 // Pre-save hook to hash password before saving
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    return next(); // If password hasn't changed, skip hashing
+    return next();
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -38,5 +53,4 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Create and export the User model
-module.exports = mongoose.model('User', UserSchema);
+export default mongoose.model('User', UserSchema);
