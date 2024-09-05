@@ -6,7 +6,7 @@ const OrderSchema = new mongoose.Schema({
     required: true,
     ref: 'User',
   },
-  items: [
+  orderItems: [
     {
       book: {
         type: mongoose.Schema.Types.ObjectId,

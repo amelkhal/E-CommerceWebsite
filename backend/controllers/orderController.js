@@ -3,17 +3,17 @@ import Book from '../models/Book.js';
 
 // Create an order
 export const createOrder = async (req, res) => {
-  const { items, shippingAddress, paymentMethod } = req.body;
+  const { orderItems, shippingAddress, paymentMethod } = req.body;
 
   // Basic validation
-  if (!items || items.length === 0 || !shippingAddress || !paymentMethod) {
-    return res.status(400).json({ message: 'Items, shipping address, and payment method are required' });
+  if (!orderItems || orderItems.length === 0 || !shippingAddress || !paymentMethod) {
+    return res.status(400).json({ message: 'Order items, shipping address, and payment method are required' });
   }
 
   try {
     // Calculate total price and check stock
     let totalPrice = 0;
-    for (let item of items) {
+    for (let item of orderItems) {
       const book = await Book.findById(item.book);
       if (!book) {
         return res.status(404).json({ message: `Book not found: ${item.book}` });
@@ -29,27 +29,28 @@ export const createOrder = async (req, res) => {
 
     const newOrder = new Order({
       user: req.user.id,
-      items,
+      orderItems,
       shippingAddress,
       paymentMethod,
-      totalPrice
+      totalPrice,
+      isPaid: false, // Default to not paid
     });
 
     const order = await newOrder.save();
     res.status(201).json(order);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error creating order:', err.message);
     res.status(500).send('Server Error');
   }
 };
 
-// Get all orders for a user
+// Get all orders for the logged-in user
 export const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user.id }).sort({ date: -1 });
+    const orders = await Order.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error fetching orders:', err.message);
     res.status(500).send('Server Error');
   }
 };
@@ -61,12 +62,12 @@ export const getOrderById = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
-    if (order.user.toString() !== req.user.id) {
+    if (order.user.toString() !== req.user.id && !req.user.isAdmin) {
       return res.status(401).json({ message: 'User not authorized' });
     }
     res.json(order);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error fetching order:', err.message);
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -88,6 +89,7 @@ export const updateOrderStatus = async (req, res) => {
     if (!order) {
       return res.status(404).json({ message: 'Order not found' });
     }
+    // Check if the user is either the owner of the order or an admin
     if (order.user.toString() !== req.user.id && !req.user.isAdmin) {
       return res.status(401).json({ message: 'User not authorized' });
     }
@@ -95,7 +97,7 @@ export const updateOrderStatus = async (req, res) => {
     await order.save();
     res.json(order);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error updating order status:', err.message);
     if (err.kind === 'ObjectId') {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -103,13 +105,13 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
-// Get all orders for a user (if not included in `getOrders`)
-export const getUserOrders = async (req, res) => {
+// Get all orders for admin
+export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user.id }).sort({ date: -1 });
+    const orders = await Order.find().sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    console.error(err.message);
+    console.error('Error fetching all orders:', err.message);
     res.status(500).send('Server Error');
   }
 };
