@@ -1,30 +1,32 @@
 import jwt from 'jsonwebtoken';
+import asyncHandler from 'express-async-handler';
 import User from '../models/User.js';
 
-// Middleware function for authentication
-const protect = async (req, res, next) => {
-  // Get token from the 'Authorization' header
-  const authHeader = req.header('Authorization');
+// Protect middleware to ensure a valid token is provided
+const protect = asyncHandler(async (req, res, next) => {
+  let token;
 
-  // Extract token from 'Bearer' scheme
-  const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+  // Check for token in Authorization header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
+
+      // Decode token and find user by ID
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await User.findById(decoded.id).select('-password'); // Attach user to request, exclude password
+
+      next();
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      res.status(401);
+      throw new Error('Not authorized, token failed');
+    }
+  }
 
   if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
+    res.status(401);
+    throw new Error('Not authorized, no token');
   }
-
-  try {
-    // Verify token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded token:', decoded); // Log decoded token for debugging
-
-    // Attach user to request object
-    req.user = await User.findById(decoded.id).select('-password');
-    next();
-  } catch (err) {
-    console.error('Token verification error:', err); // Log the error for debugging
-    res.status(401).json({ msg: 'Token is not valid' });
-  }
-};
+});
 
 export default protect;

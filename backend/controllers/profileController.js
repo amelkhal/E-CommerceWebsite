@@ -15,7 +15,8 @@ export const getUserProfile = asyncHandler(async (req, res) => {
       email: user.email,
     });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
 });
 
@@ -29,10 +30,13 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
 
-    if (req.body.password && req.body.password === req.body.confirmPassword) {
-      user.password = await bcrypt.hash(req.body.password, 10);
-    } else if (req.body.password && req.body.password !== req.body.confirmPassword) {
-      return res.status(400).json({ message: 'Passwords do not match' });
+    // Only update the password if provided and passwords match
+    if (req.body.password) {
+      if (req.body.password === req.body.confirmPassword) {
+        user.password = await bcrypt.hash(req.body.password, 10);
+      } else {
+        return res.status(400).json({ message: 'Passwords do not match' });
+      }
     }
 
     const updatedUser = await user.save();
@@ -42,6 +46,7 @@ export const updateUserProfile = asyncHandler(async (req, res) => {
       email: updatedUser.email,
     });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error('User not found');
   }
 });
