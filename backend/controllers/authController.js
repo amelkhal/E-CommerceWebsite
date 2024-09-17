@@ -1,7 +1,7 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import asyncHandler from 'express-async-handler';
-import generateToken from '../utils/generateToken.js';
+import generateToken from '../util/generateToken.js';
 
 // @desc Register new User
 // route POST /api/auth/register
